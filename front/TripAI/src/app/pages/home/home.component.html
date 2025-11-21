@@ -1,0 +1,251 @@
+<div class="max-w-3xl mx-auto p-6 space-y-8">
+  <header class="flex flex-col gap-2">
+    <div class="flex items-center justify-between">
+      <h1 class="text-3xl font-bold">GymAI</h1>
+      <label class="flex cursor-pointer gap-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5" />
+          <path
+            d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
+          ></path>
+        </svg>
+        <input
+          type="checkbox"
+          class="toggle"
+          [checked]="theme() === 'dark'"
+          (change)="toggleTheme()"
+        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </label>
+    </div>
+    <p class="text-gray-400 text-sm">
+      Diseña tus rutinas de entrenamiento y tus planes de dieta con ayuda de IA.
+    </p>
+  </header>
+
+  <section class="space-y-4 mt-6">
+    <p class="text-gray-400">
+      💬 Habla con GymAI como si fuera tu entrenador y nutricionista, pero
+      recuerda: no es un especialista real. Todo lo que ofrece es orientativo y
+      siempre es mejor consultar con un profesional.
+    </p>
+    <p class="text-gray-400">
+      🎯 Cuéntale tus objetivos, tu nivel y tus preferencias. Cuanto más
+      converses, más afinadas serán las propuestas.
+    </p>
+    <p class="text-gray-400">
+      📄 Al pulsar “Generar dieta” o “Generar rutina”, se descargará un PDF
+      personalizado según los datos que hayas dado.
+    </p>
+    <p class="text-gray-400">
+      💪 Da el primer paso, mantente constante y ve construyendo tu mejor
+      versión. ¡GymAI te acompaña!
+    </p>
+
+    <form class="mt-6 space-y-4" (ngSubmit)="save()">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Edad</label>
+          <input
+            type="number"
+            [(ngModel)]="model.age"
+            name="age"
+            min="0"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Altura (cm)</label>
+          <input
+            type="number"
+            [(ngModel)]="model.height"
+            name="height"
+            min="0"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Peso (kg)</label>
+          <input
+            type="number"
+            [(ngModel)]="model.weight"
+            name="weight"
+            min="0"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Objetivo</label>
+          <div class="space-y-1 text-sm">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="goal"
+                [(ngModel)]="model.goal"
+                value=""
+              />
+              <span>Sin especificar</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="goal"
+                [(ngModel)]="model.goal"
+                value="adelgazar"
+              />
+              <span>Adelgazar</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="goal"
+                [(ngModel)]="model.goal"
+                value="ganar_masa"
+              />
+              <span>Ganar masa muscular</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="goal"
+                [(ngModel)]="model.goal"
+                value="definir"
+              />
+              <span>Definir</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="goal"
+                [(ngModel)]="model.goal"
+                value="mantener"
+              />
+              <span>Mantener</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Actividad diaria</label>
+          <div class="space-y-1 text-sm">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="activity"
+                [(ngModel)]="model.activity"
+                value=""
+              />
+              <span>Sin especificar</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="activity"
+                [(ngModel)]="model.activity"
+                value="sedentario"
+              />
+              <span>Sedentario (trabajo de oficina, poco movimiento)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="activity"
+                [(ngModel)]="model.activity"
+                value="ligero"
+              />
+              <span>Ligera (algo de movimiento diario, paseos)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="activity"
+                [(ngModel)]="model.activity"
+                value="moderado"
+              />
+              <span>Moderada (trabajo activo o entreno 3-4 días/sem)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="activity"
+                [(ngModel)]="model.activity"
+                value="alto"
+              />
+              <span>Alta (entreno 5-6 días/sem o trabajo físico)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                class="radio radio-sm"
+                name="activity"
+                [(ngModel)]="model.activity"
+                value="muy_alto"
+              />
+              <span>Muy alta (deportista, trabajo muy físico)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1"
+          >Datos médicos relevantes</label
+        >
+        <textarea
+          [(ngModel)]="model.medicalNotes"
+          name="medicalNotes"
+          rows="3"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          placeholder="Por ejemplo: lesiones, enfermedades, medicación, intolerancias..."
+        ></textarea>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button
+          type="submit"
+          class="btn btn-primary px-5 py-2 rounded-xl font-medium shadow-md"
+        >
+          Enviar
+        </button>
+        @if (saved) {
+        <span class="text-xs text-green-600">Enviando...</span>
+        }
+      </div>
+    </form>
+  </section>
+</div>

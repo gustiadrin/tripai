@@ -1,0 +1,67 @@
+# === PROJECT CONTEXT ===
+
+This project uses **Angular 19** with the new syntax and standalone components.
+
+## 🧠 Global Angular Code Rules:
+
+- Always use **standalone components and directives**, never NgModules.
+- Use **signal()**, **computed()**, and **effect()** instead of RxJS whenever possible.
+- Use **input()** and **output()** instead of `@Input()` and `@Output()` decorators.
+- Use **@if**, **@for**, and **@switch** instead of the old structural directives `*ngIf`, `*ngFor`, and `*ngSwitch`.
+- Prefer **inject()** instead of constructor injection when appropriate.
+- Use **hostDirectives** for directive composition.
+- Avoid deprecated APIs or syntax from previous Angular versions.
+- Use **control flow blocks** (`@if`, `@else`, `@for`) with modern syntax.
+- Keep all examples, refactors, and suggestions aligned with Angular 19 syntax.
+
+## 🧱 Rules for Directives:
+
+- All directives must be **standalone**.
+- Declare inputs using `input()` and outputs using `output()`.
+- Use `inject()` for dependency injection.
+- Avoid legacy `@Directive()` metadata from previous Angular versions.
+- Use **hostDirectives** when sharing behavior across directives.
+- Do not declare directives in NgModules.
+
+## 🧩 Rules for Components:
+
+- All components must be `standalone: true`.
+- Use the `imports` array inside the component decorator.
+- Prefer **signals** for local reactive state management.
+- Use `computed()` for derived or dependent values.
+- Avoid using services + RxJS for simple reactivity cases.
+
+## 🧭 General Style:
+
+- Use strict TypeScript mode.
+- Follow the Angular Style Guide conventions.
+- Keep code clean and concise; avoid redundant comments.
+- Avoid RxJS unless it’s clearly needed.
+
+## 🧩 Reference Example:
+
+```ts
+import { Component, signal, computed } from "@angular/core";
+
+@Component({
+  selector: "app-counter",
+  standalone: true,
+  template: `
+    <button (click)="decrement()">-</button>
+    <span>{{ count() }}</span>
+    <button (click)="increment()">+</button>
+  `,
+})
+export class CounterComponent {
+  count = signal(0);
+  double = computed(() => this.count() * 2);
+
+  increment() {
+    this.count.update((c) => c + 1);
+  }
+
+  decrement() {
+    this.count.update((c) => c - 1);
+  }
+}
+```

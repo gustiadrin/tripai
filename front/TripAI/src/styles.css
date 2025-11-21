@@ -1,0 +1,52 @@
+/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "daisyui" {
+  themes: dracula --default;
+}
+
+.chat-messages {
+  transition: all 0.2s ease-in-out;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* evitamos scroll exterior, solo scrollea el contenedor del chat */
+}
+
+/* Estilos básicos para el contenido renderizado por ngx-markdown */
+.markdown-body ul,
+.markdown-body ol {
+  list-style-position: outside;
+  margin-left: 1.25rem;
+  padding-left: 0;
+}
+
+.markdown-body ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.markdown-body ol {
+  list-style-type: decimal;
+}
+
+.markdown-body li {
+  margin-bottom: 0.25rem;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeInUp 220ms ease-out both;
+}

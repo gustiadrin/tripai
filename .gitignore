@@ -1,0 +1,18 @@
+# Frontend Angular
+front/TripAI/node_modules/
+front/TripAI/dist/
+front/TripAI/.angular/
+front/TripAI/.env
+
+# Backend Spring Boot / Maven
+back/target/
+back/.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# OS / Misc
+Thumbs.db
+.DS_Store

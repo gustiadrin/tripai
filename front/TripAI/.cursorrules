@@ -1,0 +1,18 @@
+{
+  "framework": "angular",
+  "angularVersion": "19",
+  "rules": {
+    "useNewSyntax": true,
+    "preferStandaloneComponents": true,
+    "preferSignalsOverRxjs": true,
+    "preferNewControlFlow": true,
+    "preferDirectiveComposition": true,
+    "preferInjectOverConstructor": true,
+    "disallowNgModules": true
+  },
+  "style": {
+    "typescriptStrict": true,
+    "semi": true,
+    "singleQuote": true
+  }
+}
