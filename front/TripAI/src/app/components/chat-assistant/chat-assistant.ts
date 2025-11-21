@@ -11,6 +11,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
 import { RouterLink } from '@angular/router';
 import { ChatService, ChatMessage } from '../../services/chat-service';
+import { environment } from '../../../environments/environment';
 import { ProfileService } from '../../services/profile-service';
 
 @Component({
@@ -146,7 +147,7 @@ export class ChatAssistant {
 
   private async triggerPdfDownload(kind: 'routine' | 'diet') {
     try {
-      const res = await fetch('http://localhost:8080/api/export/last-plan.pdf');
+      const res = await fetch(`${environment.apiBaseUrl}/export/last-plan.pdf`);
       if (!res.ok) return;
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);

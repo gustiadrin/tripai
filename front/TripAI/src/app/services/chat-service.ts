@@ -1,6 +1,7 @@
 import { Injectable, signal, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, interval, switchMap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface ChatMessage {
   sender: 'user' | 'bot';
@@ -10,7 +11,7 @@ export interface ChatMessage {
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private base = 'http://localhost:8080/api';
+  private base = environment.apiBaseUrl;
   private storageKey = 'tripai_messages';
   messages = signal<ChatMessage[]>([]);
 
