@@ -12,7 +12,13 @@
 body {
   height: 100%;
   margin: 0;
-  overflow: hidden; /* evitamos scroll exterior, solo scrollea el contenedor del chat */
+}
+
+/* Solo ocultar overflow en desktop cuando estamos en el chat */
+@media (min-width: 768px) {
+  body.chat-page {
+    overflow: hidden;
+  }
 }
 
 /* Estilos básicos para el contenido renderizado por ngx-markdown */
