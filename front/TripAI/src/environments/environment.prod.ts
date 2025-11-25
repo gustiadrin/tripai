@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://gymai-back.fly.dev/api',
+  apiBaseUrl: 'https://tripai-back.fly.dev/api',
 };
