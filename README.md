@@ -1,6 +1,6 @@
-# TripAI
+# GymAI
 
-Aplicación Angular + Spring Boot con integración a Gemini (API REST) para un asistente de viajes.
+Aplicación Angular + Spring Boot con integración a Gemini (API REST) para un asistente de rutinas de entrenamiento y dietas.
 
 ## Requisitos
 
@@ -11,8 +11,8 @@ Aplicación Angular + Spring Boot con integración a Gemini (API REST) para un a
 
 ## Estructura
 
-- `front/TripAI/` Frontend Angular
-- `back/` Backend Spring Boot
+- `front/TripAI/` Frontend Angular (GymAI)
+- `back/` Backend Spring Boot (com.gymai.back)
 
 ## Configuración Backend
 
@@ -50,7 +50,7 @@ npm start
 ng serve
 ```
 
-El front apunta por defecto a `http://localhost:8080/api` en `ChatService`.
+El front apunta por defecto a `http://localhost:8080/api` en desarrollo. En producción usa la URL configurada en `environment.prod.ts`.
 
 ## Endpoints Backend
 
@@ -64,10 +64,12 @@ El front apunta por defecto a `http://localhost:8080/api` en `ChatService`.
 
 ## Flujo de la app
 
-- El front envía mensajes a `/api/chat`.
-- El backend guarda el mensaje del usuario en memoria, construye un prompt con los últimos 5 mensajes y consulta a Gemini.
-- La respuesta se guarda y se devuelve al front.
-- El front también persiste localmente el historial en `localStorage` (`tripai_messages`).
+- El usuario completa su perfil (edad, peso, altura, objetivos) en la página inicial.
+- El front envía mensajes a `/api/chat/stream` (streaming) o `/api/chat` (respuesta completa).
+- El backend construye un prompt con el perfil del usuario + contexto de los últimos 5 mensajes y consulta a Gemini.
+- La respuesta se devuelve mediante Server-Sent Events (streaming) para una experiencia en tiempo real.
+- El front persiste localmente el historial en `localStorage` (`gymai_messages`).
+- Se pueden generar PDFs de rutinas y dietas mediante `/api/export/last-plan.pdf`.
 
 ## Troubleshooting
 
@@ -76,7 +78,23 @@ El front apunta por defecto a `http://localhost:8080/api` en `ChatService`.
 - CORS: el backend permite `http://localhost:4200` en el controlador.
 - Postman: prueba `POST http://localhost:8080/api/chat` con `Content-Type: application/json`.
 
-## Producción
+## Despliegue
 
-- El historial en memoria es sólo para desarrollo. Sustituir por una base de datos si es necesario.
-- Mover API key a variables de entorno/secret manager.
+### Backend (Fly.io)
+
+```bash
+cd back
+fly deploy
+```
+
+### Frontend (por ejemplo, Vercel/Netlify)
+
+1. Configurar la variable de entorno con la URL del backend en producción
+2. Ejecutar `npm run build`
+3. Desplegar la carpeta `dist/gym-ai`
+
+**Notas de producción:**
+
+- El historial en memoria es sólo para desarrollo. Considerar una base de datos para persistencia.
+- Configurar la API key de Gemini como secret en Fly.io: `fly secrets set GEMINI_API_KEY=tu_key`
+- Actualizar CORS en el backend para permitir el dominio del frontend en producción.

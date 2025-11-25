@@ -1,4 +1,4 @@
-package com.tripai.back.config;
+package com.gymai.back.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

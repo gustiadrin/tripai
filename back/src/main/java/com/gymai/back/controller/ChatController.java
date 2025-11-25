@@ -1,4 +1,4 @@
-package com.tripai.back.controller;
+package com.gymai.back.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tripai.back.model.ChatMessage;
-import com.tripai.back.service.ChatService;
-import com.tripai.back.service.GeminiChatService;
-import com.tripai.back.service.PdfService;
+import com.gymai.back.model.ChatMessage;
+import com.gymai.back.service.ChatService;
+import com.gymai.back.service.GeminiChatService;
+import com.gymai.back.service.PdfService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,4 +1,4 @@
-package com.tripai.back.service;
+package com.gymai.back.service;
 
 import java.io.ByteArrayOutputStream;
 import java.awt.Color;

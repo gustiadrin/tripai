@@ -17,7 +17,7 @@ export class HomeComponent {
   private chatService = inject(ChatService);
 
   theme = signal<'light' | 'dark'>(
-    (localStorage.getItem('tripai_theme') as 'light' | 'dark') || 'dark'
+    (localStorage.getItem('gymai_theme') as 'light' | 'dark') || 'dark'
   );
 
   model: GymProfile = {
@@ -68,7 +68,7 @@ export class HomeComponent {
   toggleTheme() {
     const next = this.theme() === 'dark' ? 'light' : 'dark';
     this.theme.set(next);
-    localStorage.setItem('tripai_theme', next);
+    localStorage.setItem('gymai_theme', next);
     document.documentElement.setAttribute('data-theme', next);
   }
 }

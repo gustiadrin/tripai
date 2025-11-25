@@ -27,7 +27,7 @@ export class ChatAssistant {
   private profileService = inject(ProfileService);
   private fb = inject(FormBuilder);
   theme = signal<'light' | 'dark'>(
-    (localStorage.getItem('tripai_theme') as 'light' | 'dark') || 'dark'
+    (localStorage.getItem('gymai_theme') as 'light' | 'dark') || 'dark'
   );
 
   @ViewChild('messagesContainer')
@@ -458,7 +458,7 @@ export class ChatAssistant {
   toggleTheme() {
     const next = this.theme() === 'dark' ? 'light' : 'dark';
     this.theme.set(next);
-    localStorage.setItem('tripai_theme', next);
+    localStorage.setItem('gymai_theme', next);
     document.documentElement.setAttribute('data-theme', next);
   }
 }

@@ -1,4 +1,4 @@
-package com.tripai.back.model;
+package com.gymai.back.model;
 
 /**
  * Representa un mensaje simple en el historial (usuario o bot).

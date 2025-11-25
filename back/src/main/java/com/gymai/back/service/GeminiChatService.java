@@ -1,4 +1,4 @@
-package com.tripai.back.service;
+package com.gymai.back.service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +78,7 @@ public class GeminiChatService {
 	}
 
 	/**
-	 * Streaming de respuesta desde Gemini: va emitiendo trozos de texto segan llegan.
+	 * Streaming de respuesta desde Gemini: va emitiendo trozos de texto segan llegan.
 	 */
 	public Flux<String> streamChatbotResponse(String prompt) {
 		String url = String.format(STREAM_URL_TEMPLATE, modelName, apiKey);

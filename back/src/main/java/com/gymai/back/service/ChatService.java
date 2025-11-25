@@ -1,6 +1,6 @@
-package com.tripai.back.service;
+package com.gymai.back.service;
 
-import com.tripai.back.model.ChatMessage;
+import com.gymai.back.model.ChatMessage;
 import org.springframework.stereotype.Service;
 import java.util.*;
 

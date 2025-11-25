@@ -12,7 +12,7 @@ export interface ChatMessage {
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private base = environment.apiBaseUrl;
-  private storageKey = 'tripai_messages';
+  private storageKey = 'gymai_messages';
   messages = signal<ChatMessage[]>([]);
 
   constructor(private http: HttpClient) {

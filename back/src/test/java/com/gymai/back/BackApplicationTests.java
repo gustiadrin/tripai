@@ -1,4 +1,4 @@
-package com.tripai.back;
+package com.gymai.back;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
