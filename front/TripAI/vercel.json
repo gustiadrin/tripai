@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/gym-ai",
+  "outputDirectory": "dist/gym-ai/browser",
   "installCommand": "npm install",
   "rewrites": [
     {
