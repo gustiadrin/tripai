@@ -1,12 +1,11 @@
 {
-  "buildCommand": "npm run build -- --configuration production",
-  "outputDirectory": "dist/gym-ai/browser",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/gym-ai",
   "installCommand": "npm install",
-  "framework": null,
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
