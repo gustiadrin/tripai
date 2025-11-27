@@ -114,8 +114,8 @@ export class ChatAssistant {
   private buildCommandMessage(kind: 'routine' | 'diet'): string {
     const baseInstruction =
       kind === 'routine'
-        ? 'Genera SOLO un plan de ENTRENAMIENTO detallado y estructurado en Markdown, usando toda la información previa del perfil y la conversación. Devuelve una estructura pensada para un PDF: encabezados claros (## ...), listas de puntos y subapartados. No añadas frases de cortesía ni preguntas finales, empieza directamente por el contenido del plan.'
-        : 'Genera SOLO un plan de DIETA detallado (comidas, horarios y cantidades aproximadas) en Markdown, usando toda la información previa del perfil y la conversación. Devuelve una estructura pensada para un PDF: encabezados claros (## ...), listas de puntos y subapartados. No añadas frases de cortesía ni preguntas finales, empieza directamente por el contenido del plan.';
+        ? 'Genera un plan de ENTRENAMIENTO detallado. IMPORTANTE: Estructura los días en una TABLA Markdown con las columnas: Día, Ejercicio, Series, Repeticiones. Usa encabezados claros (##) para las secciones principales.'
+        : 'Genera un plan de DIETA detallado. IMPORTANTE: Estructura las comidas en una TABLA Markdown con las columnas: Comida, Opción 1, Opción 2, Calorías aprox. Usa encabezados claros (##) para las secciones principales.';
 
     const profile = this.profileService.profile();
     if (!profile) {
