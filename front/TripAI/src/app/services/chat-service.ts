@@ -14,6 +14,7 @@ export class ChatService {
   private base = environment.apiBaseUrl;
   private storageKey = 'gymai_messages';
   messages = signal<ChatMessage[]>([]);
+  updateActivity!: () => void;
 
   constructor(private http: HttpClient) {
     // Cargar historial desde localStorage al iniciar (si existe)
@@ -34,14 +35,24 @@ export class ChatService {
         localStorage.setItem(this.storageKey, JSON.stringify(current));
       } catch {}
     });
-    // Polling simple: cada 2s pide mensajes
-    interval(2000)
+    // Polling más suave: cada 5s y solo si no hay actividad reciente
+    let lastActivity = Date.now();
+
+    interval(5000)
       .pipe(
-        switchMap(() => this.http.get<ChatMessage[]>(`${this.base}/messages`))
+        switchMap(() => {
+          // Solo hacer polling si no ha habido actividad en los últimos 3 segundos
+          if (Date.now() - lastActivity < 3000) {
+            return [];
+          }
+          return this.http.get<ChatMessage[]>(`${this.base}/messages`);
+        })
       )
       .subscribe({
         next: (msgs) => {
-          const withTs = (msgs || [])
+          if (!Array.isArray(msgs) || msgs.length === 0) return;
+
+          const withTs = msgs
             .filter(
               (m) =>
                 !(
@@ -57,29 +68,30 @@ export class ChatService {
 
           const current = this.messages();
 
-          // Si ya tenemos un mensaje de bienvenida local y el backend aún no lo conoce,
-          // lo preservamos siempre como primer mensaje visual.
-          const hasLocalWelcome =
-            current.length > 0 &&
-            current[0].sender === 'bot' &&
-            (current[0].content.startsWith('Hola, soy GymAI.') ||
-              current[0].content.startsWith(
-                'Basándome en los datos que me has dado'
-              ));
+          // Solo actualizar si hay cambios reales
+          if (JSON.stringify(current) !== JSON.stringify(withTs)) {
+            const hasLocalWelcome =
+              current.length > 0 &&
+              current[0].sender === 'bot' &&
+              (current[0].content.startsWith('Hola, soy GymAI.') ||
+                current[0].content.startsWith(
+                  'Basándome en los datos que me has dado'
+                ));
 
-          if (hasLocalWelcome) {
-            // Si aún no hay historial en backend, dejamos sólo el saludo.
-            if (withTs.length === 0) {
-              return;
+            if (hasLocalWelcome && withTs.length > 0) {
+              this.messages.set([current[0], ...withTs]);
+            } else if (!hasLocalWelcome) {
+              this.messages.set(withTs);
             }
-            // Si ya hay historial en backend, lo mostramos detrás del saludo.
-            this.messages.set([current[0], ...withTs]);
-          } else {
-            this.messages.set(withTs);
           }
         },
         error: () => {},
       });
+
+    // Actualizar timestamp de actividad cuando se envían mensajes
+    this.updateActivity = () => {
+      lastActivity = Date.now();
+    };
   }
 
   sendMessageStream(
