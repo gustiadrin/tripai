@@ -41,6 +41,11 @@ export class ChatAssistant {
 
   private previousMessageCount = 0;
 
+  // Touch handling para ocultar teclado con swipe down
+  private touchStartY = 0;
+  private touchCurrentY = 0;
+  private isInputFocused = false;
+
   constructor() {
     this.form = this.fb.group({
       message: [''],
@@ -460,6 +465,42 @@ export class ChatAssistant {
     this.theme.set(next);
     localStorage.setItem('gymai_theme', next);
     document.documentElement.setAttribute('data-theme', next);
+  }
+
+  // ===== Swipe down para ocultar teclado (como ChatGPT) =====
+
+  onTouchStart(event: TouchEvent) {
+    this.touchStartY = event.touches[0].clientY;
+    this.touchCurrentY = this.touchStartY;
+    this.isInputFocused =
+      document.activeElement instanceof HTMLInputElement ||
+      document.activeElement instanceof HTMLTextAreaElement;
+  }
+
+  onTouchMove(event: TouchEvent) {
+    this.touchCurrentY = event.touches[0].clientY;
+  }
+
+  onTouchEnd() {
+    const swipeDistance = this.touchCurrentY - this.touchStartY;
+    const minSwipeDistance = 50; // píxeles mínimos para considerar swipe
+
+    // Si el usuario hizo swipe hacia abajo y hay un input enfocado, ocultar teclado
+    if (swipeDistance > minSwipeDistance && this.isInputFocused) {
+      this.hideKeyboard();
+    }
+
+    // Reset
+    this.touchStartY = 0;
+    this.touchCurrentY = 0;
+    this.isInputFocused = false;
+  }
+
+  private hideKeyboard() {
+    // Quitar focus del elemento activo para ocultar el teclado
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
   }
 }
 

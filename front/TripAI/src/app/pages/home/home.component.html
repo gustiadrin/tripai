@@ -1,4 +1,9 @@
-<div class="max-w-3xl mx-auto p-6 space-y-8">
+<div
+  class="max-w-3xl mx-auto p-6 space-y-8 min-h-dvh"
+  (touchstart)="onTouchStart($event)"
+  (touchmove)="onTouchMove($event)"
+  (touchend)="onTouchEnd()"
+>
   <header class="flex flex-col gap-2">
     <div class="flex items-center justify-between">
       <h1 class="text-3xl font-bold">GymAI</h1>
