@@ -5,36 +5,59 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * Gestiona un contexto simple en memoria para construir prompts con las
- * últimas interacciones. No persistente y apto sólo para desarrollo/demo.
+ * Servicio centralizado para gestión de mensajes y contexto.
+ * Única fuente de verdad para el historial de chat.
  */
 @Service
 public class ChatService {
 
-    private final List<ChatMessage> context = new ArrayList<>();
-
-
+    private static final int MAX_MESSAGES = 50;
+    private static final int CONTEXT_SIZE = 5;
+    
+    private final List<ChatMessage> messages = Collections.synchronizedList(new ArrayList<>());
 
     /**
-     * Devuelve hasta los últimos 5 mensajes.
+     * Devuelve todos los mensajes del historial.
+     */
+    public List<ChatMessage> getAllMessages() {
+        return new ArrayList<>(messages);
+    }
+
+    /**
+     * Devuelve hasta los últimos 5 mensajes para contexto.
      */
     public List<ChatMessage> getLastContext() {
-        int size = context.size();
-        return context.subList(Math.max(0, size - 5), size);
+        int size = messages.size();
+        return messages.subList(Math.max(0, size - CONTEXT_SIZE), size);
     }
 
     /**
-     * Añade un mensaje al contexto, manteniendo un máximo de 10.
+     * Añade un mensaje al historial, manteniendo un máximo de 50.
      */
-    public void addToContext(ChatMessage message) {
-        context.add(message);
-        if (context.size() > 10) context.remove(0);
+    public void addMessage(ChatMessage message) {
+        messages.add(message);
+        if (messages.size() > MAX_MESSAGES) {
+            messages.remove(0);
+        }
     }
 
     /**
-     * Limpia todo el contexto almacenado en memoria.
+     * Busca el último mensaje del bot para generar PDFs.
      */
-    public void clearContext() {
-        context.clear();
+    public ChatMessage getLastBotMessage() {
+        for (int i = messages.size() - 1; i >= 0; i--) {
+            ChatMessage m = messages.get(i);
+            if ("bot".equals(m.getSender())) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Limpia todo el historial de mensajes.
+     */
+    public void clearMessages() {
+        messages.clear();
     }
 }

@@ -21,6 +21,7 @@ import com.gymai.back.model.ChatMessage;
 import com.gymai.back.service.ChatService;
 import com.gymai.back.service.GeminiChatService;
 import com.gymai.back.service.PdfService;
+import com.gymai.back.service.PromptBuilder;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,10 +35,8 @@ public class ChatController {
 
 	private final GeminiChatService geminiChatService;
 	private final ChatService chatService;
-	private final List<ChatMessage> messages = Collections.synchronizedList(new ArrayList<>());
 	private final PdfService pdfService;
-
-	private static final String SYSTEM_PROMPT = "Eres GymAI, un asistente experto en rutina de entrenamientos y dietas. Mantén el tema en rutinas de gimnasio y dietas y guía al usuario si se desvía. Elabora respuestas cortas y concisas que mantengan la conversación fluida.\n";
+	private final PromptBuilder promptBuilder;
 
 	/**
 	 * Mensaje de entrada enviado por el front.
@@ -54,22 +53,12 @@ public class ChatController {
 	 * Devuelve el historial simple en memoria (sólo para desarrollo/demo).
 	 */
 	public List<ChatMessage> getMessages() {
-		return messages;
-	}
-
-	private ChatMessage getLastBotMessage() {
-		for (int i = messages.size() - 1; i >= 0; i--) {
-			ChatMessage m = messages.get(i);
-			if ("bot".equals(m.getSender())) {
-				return m;
-			}
-		}
-		return null;
+		return chatService.getAllMessages();
 	}
 
 	@GetMapping(path = "/export/last-plan.pdf", produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<byte[]> exportLastPlanPdf() {
-		ChatMessage lastBot = getLastBotMessage();
+		ChatMessage lastBot = chatService.getLastBotMessage();
 		if (lastBot == null) {
 			return ResponseEntity.noContent().build();
 		}
@@ -85,8 +74,7 @@ public class ChatController {
 
 	@PostMapping("/messages/reset")
 	public void resetMessages() {
-		messages.clear();
-		chatService.clearContext();
+		chatService.clearMessages();
 	}
 	
 
@@ -99,49 +87,34 @@ public class ChatController {
     public ChatResponse chat(@RequestBody ChatRequest request) {
         String userText = request.message() == null ? "" : request.message();
 
-        String storedUserText = extractUserMessage(userText);
+        String storedUserText = promptBuilder.extractUserMessage(userText);
 
         ChatMessage userMsg = new ChatMessage("user", storedUserText);
         userMsg.setTimestamp(Instant.now().toString());
-        messages.add(userMsg);
-        chatService.addToContext(userMsg);
+        chatService.addMessage(userMsg);
 
-        StringBuilder prompt = new StringBuilder(SYSTEM_PROMPT);
-        chatService.getLastContext().forEach(m ->
-            prompt.append(m.getSender()).append(": ").append(m.getContent()).append("\n")
-        );
-        // Añadimos al final el mensaje completo tal y como lo envió el front
-        prompt.append("user: ").append(userText).append("\n");
-
-        String reply = geminiChatService.getChatbotResponse(prompt.toString());
+        String prompt = promptBuilder.buildPrompt(chatService.getLastContext(), userText);
+        String reply = geminiChatService.getChatbotResponse(prompt);
 
         ChatMessage botMsg = new ChatMessage("bot", reply);
         botMsg.setTimestamp(Instant.now().toString());
-        messages.add(botMsg);
-        chatService.addToContext(botMsg);
+        chatService.addMessage(botMsg);
         return new ChatResponse(reply);
     }
 
 	@GetMapping(path = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<ServerSentEvent<String>> chatStream(@RequestParam("message") String message) {
 		String userText = message == null ? "" : message;
-		String storedUserText = extractUserMessage(userText);
+		String storedUserText = promptBuilder.extractUserMessage(userText);
 
 		ChatMessage userMsg = new ChatMessage("user", storedUserText);
 		userMsg.setTimestamp(Instant.now().toString());
-		messages.add(userMsg);
-		chatService.addToContext(userMsg);
+		chatService.addMessage(userMsg);
 
-		StringBuilder prompt = new StringBuilder(SYSTEM_PROMPT);
-		chatService.getLastContext().forEach(m ->
-				prompt.append(m.getSender()).append(": ").append(m.getContent()).append("\n")
-		);
-		// Añadimos el mensaje completo enviado desde el front (con perfil, si lo hay)
-		prompt.append("user: ").append(userText).append("\n");
-
+		String prompt = promptBuilder.buildPrompt(chatService.getLastContext(), userText);
 		StringBuilder fullReplyBuilder = new StringBuilder();
 
-		return geminiChatService.streamChatbotResponse(prompt.toString())
+		return geminiChatService.streamChatbotResponse(prompt)
 				.map(chunk -> {
 					fullReplyBuilder.append(chunk);
 					return ServerSentEvent.<String>builder()
@@ -152,23 +125,8 @@ public class ChatController {
 					String fullReply = fullReplyBuilder.toString();
 					ChatMessage botMsg = new ChatMessage("bot", fullReply);
 					botMsg.setTimestamp(Instant.now().toString());
-					messages.add(botMsg);
-					chatService.addToContext(botMsg);
+					chatService.addMessage(botMsg);
 				});
 	}
 
-	/**
-	 * Si el texto viene en el formato
-	 * "Perfil del usuario ... \n\nMensaje del usuario: <texto>", devuelve solo
-	 * la parte de "Mensaje del usuario" para guardar en historial/contexto.
-	 */
-	private String extractUserMessage(String raw) {
-		if (raw == null) return "";
-		String marker = "Mensaje del usuario:";
-		int idx = raw.indexOf(marker);
-		if (idx == -1) {
-			return raw;
-		}
-		return raw.substring(idx + marker.length()).trim();
-	}
 }

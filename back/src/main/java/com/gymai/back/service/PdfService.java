@@ -126,13 +126,7 @@ public class PdfService {
     }
 
     private void parseAndAddContent(Document document, String content) throws DocumentException {
-        // Limpieza inicial
-        String normalized = content
-            .replace("```markdown", "")
-            .replace("```", "")
-            .replace("**", "")
-            .replace("•", "\n- ");
-        
+        String normalized = normalizeContent(content);
         String[] lines = normalized.split("\r?\n");
         
         List<String> tableBuffer = new ArrayList<>();
@@ -141,62 +135,68 @@ public class PdfService {
         for (String rawLine : lines) {
             String line = rawLine.trim();
             
-            // Detectar inicio/fin de tabla
+            if (line.isEmpty()) continue;
+            
+            // Manejo de tablas
             if (line.startsWith("|")) {
                 inTable = true;
                 tableBuffer.add(line);
                 continue;
             } else if (inTable) {
-                // Se acabó la tabla
                 renderTable(document, tableBuffer);
                 tableBuffer.clear();
                 inTable = false;
             }
             
-            if (line.isEmpty()) continue;
-
-            // Headers
-            if (line.startsWith("## ")) {
-                String headingText = line.substring(3).trim();
-                addSectionHeader(document, headingText);
-                continue;
-            }
-
-            if (line.startsWith("### ")) {
-                String subheadingText = line.substring(4).trim();
-                Paragraph subheading = new Paragraph(subheadingText, getSubsectionFont());
-                subheading.setSpacingBefore(12f);
-                subheading.setSpacingAfter(6f);
-                document.add(subheading);
-                continue;
-            }
-
-            // Listas
-            if (line.startsWith("- ") || line.startsWith("* ")) {
-                String itemText = line.substring(2).trim();
-                addListItem(document, itemText);
-                continue;
-            }
-
-            // Listas numeradas
-            if (line.matches("^\\d+\\.\\s.*")) {
-                int dotIndex = line.indexOf(".");
-                String itemText = line.substring(dotIndex + 1).trim();
-                String number = line.substring(0, dotIndex);
-                addNumberedItem(document, number, itemText);
-                continue;
-            }
-
-            // Texto normal
-            Paragraph p = new Paragraph(line, getBodyFont());
-            p.setSpacingAfter(6f);
-            document.add(p);
+            // Procesar línea individual
+            processLine(document, line);
         }
         
-        // Si quedó tabla pendiente al final
+        // Tabla pendiente al final
         if (inTable && !tableBuffer.isEmpty()) {
             renderTable(document, tableBuffer);
         }
+    }
+    
+    private String normalizeContent(String content) {
+        return content
+            .replace("```markdown", "")
+            .replace("```", "")
+            .replace("**", "")
+            .replace("•", "\n- ");
+    }
+    
+    private void processLine(Document document, String line) throws DocumentException {
+        if (line.startsWith("## ")) {
+            String headingText = line.substring(3).trim();
+            addSectionHeader(document, headingText);
+        } else if (line.startsWith("### ")) {
+            String subheadingText = line.substring(4).trim();
+            addSubsectionHeader(document, subheadingText);
+        } else if (line.startsWith("- ") || line.startsWith("* ")) {
+            String itemText = line.substring(2).trim();
+            addListItem(document, itemText);
+        } else if (line.matches("^\\d+\\.\\s.*")) {
+            int dotIndex = line.indexOf(".");
+            String itemText = line.substring(dotIndex + 1).trim();
+            String number = line.substring(0, dotIndex);
+            addNumberedItem(document, number, itemText);
+        } else {
+            addNormalText(document, line);
+        }
+    }
+    
+    private void addSubsectionHeader(Document document, String text) throws DocumentException {
+        Paragraph subheading = new Paragraph(text, getSubsectionFont());
+        subheading.setSpacingBefore(12f);
+        subheading.setSpacingAfter(6f);
+        document.add(subheading);
+    }
+    
+    private void addNormalText(Document document, String text) throws DocumentException {
+        Paragraph p = new Paragraph(text, getBodyFont());
+        p.setSpacingAfter(6f);
+        document.add(p);
     }
 
     private void renderTable(Document document, List<String> markdownLines) throws DocumentException {
