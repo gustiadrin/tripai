@@ -51,17 +51,6 @@
   </header>
 
   <section class="space-y-4 mt-6">
-    <p class="text-gray-400">
-      💬 Habla con GymAI como si fuera tu entrenador y nutricionista, pero
-      recuerda: NO ES UN ESPECIALISTA REAL. Todo lo que ofrece es orientativo y
-      siempre es mejor consultar con un profesional. Cuanto más converses, más
-      afinadas serán las propuestas.
-    </p>
-    <p class="text-gray-400">
-      💪 Da el primer paso, mantente constante y ve construyendo tu mejor
-      versión. ¡GymAI te acompaña!
-    </p>
-
     <form class="mt-6 space-y-4" (ngSubmit)="save()">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
@@ -232,6 +221,12 @@
           placeholder="Por ejemplo: lesiones, enfermedades, medicación, intolerancias..."
         ></textarea>
       </div>
+      <p class="text-gray-400">
+        💬 Habla con GymAI como si fuera tu entrenador y nutricionista, pero
+        recuerda: NO ES UN ESPECIALISTA REAL. Todo lo que ofrece es orientativo
+        y siempre es mejor consultar con un profesional. Cuanto más converses,
+        más afinadas serán las propuestas.
+      </p>
 
       <div class="flex items-center gap-3">
         <button
