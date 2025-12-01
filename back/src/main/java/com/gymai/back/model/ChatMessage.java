@@ -5,16 +5,23 @@ package com.gymai.back.model;
  */
 public class ChatMessage {
 
+	private String id;
 	private String sender;
 	private String content;
 	private String timestamp;
 
-	public ChatMessage() {}
+	public ChatMessage() {
+		this.id = java.util.UUID.randomUUID().toString();
+	}
 
 	public ChatMessage(String sender, String content) {
+		this.id = java.util.UUID.randomUUID().toString();
 		this.sender = sender;
 		this.content = content;
 	}
+
+	public String getId() { return id; }
+	public void setId(String id) { this.id = id; }
 
 	public String getSender() { return sender; }
 	public void setSender(String sender) { this.sender = sender; }

@@ -68,6 +68,8 @@ export class ChatService {
             )
             .map((m) => ({
               ...m,
+              // Si el backend no envía ID (legacy), generamos uno temporal,
+              // pero idealmente ya debería venir del back.
               id: m.id || this.generateId(),
               timestamp: m.timestamp || new Date().toISOString(),
             }));
@@ -194,6 +196,7 @@ export class ChatService {
 
         return {
           ...m,
+          // Preferir ID del servidor.
           id: m.id || this.generateId(),
           content,
           timestamp: m.timestamp || new Date().toISOString(),
