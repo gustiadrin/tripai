@@ -46,6 +46,15 @@ export class ChatAssistant {
   private touchCurrentY = 0;
   private isInputFocused = false;
 
+  // Track messages by ID para evitar re-renders innecesarios
+  trackByMessageId(index: number, message: ChatMessage): string {
+    return message.id || `${index}-${message.timestamp}`;
+  }
+
+  private generateId(): string {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
   constructor() {
     this.form = this.fb.group({
       message: [''],
@@ -72,6 +81,7 @@ export class ChatAssistant {
           // No hay historial: creamos saludo inicial
           this.chat.messages.set([
             {
+              id: this.generateId(),
               sender: 'bot',
               content: welcomeTextNoProfile,
               timestamp: new Date().toISOString(),
@@ -241,7 +251,12 @@ export class ChatAssistant {
 
     this.chat.messages.update((m: ChatMessage[]) => [
       ...m,
-      { sender: 'user', content: text, timestamp: new Date().toISOString() },
+      {
+        id: this.generateId(),
+        sender: 'user',
+        content: text,
+        timestamp: new Date().toISOString(),
+      },
     ]);
 
     this.draft.set('');
@@ -281,7 +296,12 @@ export class ChatAssistant {
     const botIndex = this.chat.messages().length;
     this.chat.messages.update((m: ChatMessage[]) => [
       ...m,
-      { sender: 'bot', content: '', timestamp: new Date().toISOString() },
+      {
+        id: this.generateId(),
+        sender: 'bot',
+        content: '',
+        timestamp: new Date().toISOString(),
+      },
     ]);
 
     const wordsQueue: string[] = [];
@@ -413,7 +433,12 @@ export class ChatAssistant {
     const botIndex = this.chat.messages().length;
     this.chat.messages.update((m: ChatMessage[]) => [
       ...m,
-      { sender: 'bot', content: '', timestamp: new Date().toISOString() },
+      {
+        id: this.generateId(),
+        sender: 'bot',
+        content: '',
+        timestamp: new Date().toISOString(),
+      },
     ]);
 
     let fullReply = '';

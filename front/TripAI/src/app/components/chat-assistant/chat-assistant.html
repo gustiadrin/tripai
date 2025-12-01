@@ -59,7 +59,8 @@
     #messagesContainer
     class="flex-1 min-h-0 overflow-x-hidden relative overflow-y-auto mb-4 px-2"
   >
-    @for (m of visibleMessages(); track $index; let i = $index) {
+    @for (m of visibleMessages(); track trackByMessageId($index, m); let i =
+    $index) {
     <div
       class="message animate-in flex mb-3"
       [class.justify-end]="m.sender === 'user'"

@@ -4,6 +4,7 @@ import { firstValueFrom, interval, switchMap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface ChatMessage {
+  id?: string;
   sender: 'user' | 'bot';
   content: string;
   timestamp?: string;
@@ -15,6 +16,10 @@ export class ChatService {
   private storageKey = 'gymai_messages';
   messages = signal<ChatMessage[]>([]);
   updateActivity!: () => void;
+
+  private generateId(): string {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
 
   constructor(private http: HttpClient) {
     // Cargar historial desde localStorage al iniciar (si existe)
@@ -63,13 +68,23 @@ export class ChatService {
             )
             .map((m) => ({
               ...m,
+              id: m.id || this.generateId(),
               timestamp: m.timestamp || new Date().toISOString(),
             }));
 
           const current = this.messages();
 
-          // Solo actualizar si hay cambios reales
-          if (JSON.stringify(current) !== JSON.stringify(withTs)) {
+          // Comparar por longitud y contenido del último mensaje para evitar re-renders
+          if (withTs.length === 0) return;
+
+          const needsUpdate =
+            current.length !== withTs.length ||
+            (withTs.length > 0 &&
+              current.length > 0 &&
+              current[current.length - 1]?.content !==
+                withTs[withTs.length - 1]?.content);
+
+          if (needsUpdate) {
             const hasLocalWelcome =
               current.length > 0 &&
               current[0].sender === 'bot' &&
@@ -179,6 +194,7 @@ export class ChatService {
 
         return {
           ...m,
+          id: m.id || this.generateId(),
           content,
           timestamp: m.timestamp || new Date().toISOString(),
         };
