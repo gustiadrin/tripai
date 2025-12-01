@@ -246,9 +246,6 @@ export class ChatAssistant {
     const text = (rawValue as string).trim();
     if (!text) return;
 
-    // Marcar actividad para evitar polling innecesario
-    this.chat.updateActivity();
-
     this.chat.messages.update((m: ChatMessage[]) => [
       ...m,
       {

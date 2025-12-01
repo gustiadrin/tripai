@@ -97,13 +97,6 @@ public class GeminiChatService {
 				.contentType(MediaType.APPLICATION_JSON)
 				.bodyValue(body)
 				.retrieve()
-				.onStatus(status -> status.isError(), response -> {
-					return response.bodyToMono(String.class)
-							.flatMap(errorBody -> {
-								System.err.println("ERROR GEMINI API: " + response.statusCode() + " -> " + errorBody);
-								return reactor.core.publisher.Mono.error(new RuntimeException("Gemini Error: " + response.statusCode() + " " + errorBody));
-							});
-				})
 				.bodyToFlux(Map.class)
 				.flatMap(chunk -> {
 					try {
