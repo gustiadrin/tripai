@@ -45,12 +45,6 @@ public class GeminiChatService {
 		try {
 			String url = String.format(BASE_URL, modelName, apiKey);
 
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
-
-			Map<String, Object> textPart = new HashMap<>();
-			textPart.put("text", userMessage);
-
 			Map<String, Object> part = new HashMap<>();
 			part.put("text", userMessage);
 
@@ -60,30 +54,49 @@ public class GeminiChatService {
 			Map<String, Object> body = new HashMap<>();
 			body.put("contents", List.of(content));
 
-			HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-			RestTemplate restTemplate = new RestTemplate();
-
-			@SuppressWarnings("unchecked")
-			Map<String, Object> response = restTemplate.postForObject(url, request, Map.class);
-
-			// Navegar la respuesta para extraer el texto:
-			// candidates[0].content.parts[0].text
-			if (response == null)
-				return "Respuesta vacía de Gemini";
-			List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
-			if (candidates == null || candidates.isEmpty())
-				return "Sin candidatos en la respuesta";
-			Map<String, Object> firstCandidate = candidates.get(0);
-			Map<String, Object> contentObj = (Map<String, Object>) firstCandidate.get("content");
-			if (contentObj == null)
-				return "Respuesta sin contenido";
-			List<Map<String, Object>> parts = (List<Map<String, Object>>) contentObj.get("parts");
-			if (parts == null || parts.isEmpty())
-				return "Respuesta sin partes";
-			Object text = parts.get(0).get("text");
-			return text != null ? text.toString() : "Respuesta sin texto";
+			return webClient.post()
+					.uri(url)
+					.contentType(MediaType.APPLICATION_JSON)
+					.bodyValue(body)
+					.retrieve()
+					.bodyToMono(Map.class)
+					.map(response -> {
+						if (response == null)
+							return "Respuesta vacía de Gemini";
+						@SuppressWarnings("unchecked")
+						List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
+						if (candidates == null || candidates.isEmpty())
+							return "Sin candidatos en la respuesta";
+						Map<String, Object> firstCandidate = candidates.get(0);
+						@SuppressWarnings("unchecked")
+						Map<String, Object> contentObj = (Map<String, Object>) firstCandidate.get("content");
+						if (contentObj == null)
+							return "Respuesta sin contenido";
+						@SuppressWarnings("unchecked")
+						List<Map<String, Object>> parts = (List<Map<String, Object>>) contentObj.get("parts");
+						if (parts == null || parts.isEmpty())
+							return "Respuesta sin partes";
+						Object text = parts.get(0).get("text");
+						return text != null ? text.toString() : "Respuesta sin texto";
+					})
+					.retryWhen(reactor.util.retry.Retry.backoff(3, java.time.Duration.ofSeconds(2))
+							.filter(throwable -> {
+								if (throwable instanceof WebClientResponseException wcre) {
+									return wcre.getStatusCode().value() == 429
+											|| wcre.getStatusCode().is5xxServerError();
+								}
+								return false;
+							}))
+					.block();
 		} catch (Exception e) {
-			return "Error al conectar con la API de Gemini: " + e.getMessage();
+			// Si fallan los reintentos (o error 4xx no reintentable), llegamos aquí.
+			// Podemos inspeccionar la causa para dar el mensaje amigable.
+			Throwable cause = e.getCause() != null ? e.getCause() : e;
+			if (cause instanceof WebClientResponseException wcre && wcre.getStatusCode().value() == 429) {
+				return "⏳ Se ha superado la cuota gratuita de uso. Por favor, inténtalo más tarde.";
+			}
+			// Mensaje genérico amigable para otros errores graves
+			return "⏳ El sistema está recibiendo muchas peticiones. Por favor, inténtalo de nuevo más tarde.";
 		}
 	}
 
@@ -135,14 +148,23 @@ public class GeminiChatService {
 								})
 								.filter(t -> !t.isEmpty());
 					} catch (Exception e) {
-						return Flux.just("Error al procesar chunk de Gemini: " + e.getMessage());
+						return Flux.just("Error al procesar chunk de la IA: " + e.getMessage());
 					}
 				})
+				.retryWhen(reactor.util.retry.Retry.backoff(3, java.time.Duration.ofSeconds(2))
+						.filter(throwable -> {
+							if (throwable instanceof WebClientResponseException wcre) {
+								return wcre.getStatusCode().value() == 429
+										|| wcre.getStatusCode().is5xxServerError();
+							}
+							return false;
+						}))
 				.onErrorResume(WebClientResponseException.class, ex -> {
 					String friendlyMessage = mapErrorToUserMessage(ex);
 					return Flux.just(friendlyMessage);
 				})
-				.onErrorResume(Exception.class, ex -> Flux.just("❌ Error interno: " + ex.getMessage()));
+				.onErrorResume(Exception.class, ex -> Flux.just(
+						"⏳ El sistema está recibiendo muchas peticiones. Por favor, inténtalo de nuevo más tarde."));
 	}
 
 	private String mapErrorToUserMessage(WebClientResponseException ex) {
@@ -157,7 +179,7 @@ public class GeminiChatService {
 
 			// Mensajes por defecto según código HTTP
 			if (ex.getStatusCode().value() == 429) {
-				return "⏳ Se ha superado la cuota gratuita de uso.\nEsta aplicación funciona actualmente con un plan gratuito, por lo que tiene límites de uso.\nPor favor, espera unos minutos antes de volver a intentarlo.";
+				return "⏳ Se ha superado el límite de uso.\nPor favor, intentalo más tarde.";
 			}
 			if (ex.getStatusCode().value() == 400) {
 				return "⚠️ Solicitud incorrecta. Verifica que tu API Key sea válida.";
@@ -171,13 +193,13 @@ public class GeminiChatService {
 				JsonNode errorObj = root.get("error");
 				if (errorObj.has("message")) {
 					String msg = errorObj.get("message").asText();
-					return "❌ Error de Gemini (" + ex.getStatusCode().value() + "): " + msg;
+					return "❌ Error de la IA (" + ex.getStatusCode().value() + "): " + msg;
 				}
 			}
 
-			return "❌ Error de Gemini (" + ex.getStatusCode().value() + "): " + errorBody;
+			return "❌ Error de la IA (" + ex.getStatusCode().value() + "): " + errorBody;
 		} catch (Exception e) {
-			return "❌ Error de conexión con Gemini (" + ex.getStatusCode().value() + ").";
+			return "❌ Error de conexión con la IA (" + ex.getStatusCode().value() + ").";
 		}
 	}
 }
