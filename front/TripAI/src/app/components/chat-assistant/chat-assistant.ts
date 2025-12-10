@@ -13,7 +13,6 @@ import { RouterLink } from '@angular/router';
 import { ChatService, ChatMessage } from '../../services/chat-service';
 import { environment } from '../../../environments/environment';
 import { ProfileService } from '../../services/profile-service';
-import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-chat-assistant',
@@ -27,7 +26,10 @@ export class ChatAssistant {
   chat = inject(ChatService);
   private profileService = inject(ProfileService);
   private fb = inject(FormBuilder);
-  themeService = inject(ThemeService);
+
+  theme = signal<'light' | 'dark'>(
+    (localStorage.getItem('gymai_theme') as 'light' | 'dark') || 'dark'
+  );
 
   @ViewChild('messagesContainer')
   messagesContainer?: ElementRef<HTMLDivElement>;
@@ -104,6 +106,9 @@ export class ChatAssistant {
         this.startConversationWithProfile(profile!);
       }
     });
+
+    // Restaurar tema y scroll
+    document.documentElement.setAttribute('data-theme', this.theme());
 
     // ✅ Solo scrollea si entró un mensaje nuevo
     effect(() => {
@@ -484,7 +489,11 @@ export class ChatAssistant {
   }
 
   toggleTheme() {
-    this.themeService.toggleTheme();
+    const next = this.theme() === 'dark' ? 'light' : 'dark';
+    this.theme.set(next);
+    localStorage.setItem('gymai_theme', next);
+
+    document.documentElement.setAttribute('data-theme', next);
   }
 
   // ===== Swipe down para ocultar teclado (como ChatGPT) =====

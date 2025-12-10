@@ -15,12 +15,20 @@
 html,
 body {
   height: 100%;
-  height: 100dvh;
-  /* Dynamic viewport height */
+  min-height: 100svh;
+  /* User request: 100svh for real mobile height */
   margin: 0;
   overscroll-behavior: none;
-  /* Evita el bounce en iOS */
+  /* DaisyUI handles background color via data-theme, but we ensure it applies to both */
   @apply bg-base-100 text-base-content;
+}
+
+html {
+  /* User request: Ensure html background matches body */
+  background-color: canvas;
+  /* 'canvas' is a system keyword, but with DaisyUI we rely on the @apply above. 
+     To be safe and explicit as requested: */
+  @apply bg-base-100;
 }
 
 /* Evitar zoom en inputs en iOS (requiere font-size >= 16px) */
