@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { Meta } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +16,7 @@ export class HomeComponent {
   private profileService = inject(ProfileService);
   private router = inject(Router);
   private chatService = inject(ChatService);
+  private meta = inject(Meta);
 
   theme = signal<'light' | 'dark'>(
     (localStorage.getItem('gymai_theme') as 'light' | 'dark') || 'dark'
@@ -43,7 +45,9 @@ export class HomeComponent {
     }
 
     // Restaurar tema al iniciar
-    document.documentElement.setAttribute('data-theme', this.theme());
+    const currentTheme = this.theme();
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    this.updateMetaThemeColor(currentTheme);
   }
 
   async save() {
@@ -85,6 +89,13 @@ export class HomeComponent {
     localStorage.setItem('gymai_theme', next);
 
     document.documentElement.setAttribute('data-theme', next);
+    this.updateMetaThemeColor(next);
+  }
+
+  private updateMetaThemeColor(theme: 'light' | 'dark') {
+    const color = theme === 'dark' ? '#282a36' : '#ffffff';
+    // Actualizamos o añadimos el meta tag de theme-color
+    this.meta.updateTag({ name: 'theme-color', content: color });
   }
 
   // ===== Swipe down para ocultar teclado =====

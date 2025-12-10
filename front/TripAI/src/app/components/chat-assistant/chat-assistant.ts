@@ -6,6 +6,7 @@ import {
   signal,
   effect,
 } from '@angular/core';
+import { Meta } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
@@ -26,6 +27,7 @@ export class ChatAssistant {
   chat = inject(ChatService);
   private profileService = inject(ProfileService);
   private fb = inject(FormBuilder);
+  private meta = inject(Meta);
 
   theme = signal<'light' | 'dark'>(
     (localStorage.getItem('gymai_theme') as 'light' | 'dark') || 'dark'
@@ -108,7 +110,9 @@ export class ChatAssistant {
     });
 
     // Restaurar tema y scroll
-    document.documentElement.setAttribute('data-theme', this.theme());
+    const currentTheme = this.theme();
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    this.updateMetaThemeColor(currentTheme);
 
     // ✅ Solo scrollea si entró un mensaje nuevo
     effect(() => {
@@ -494,6 +498,13 @@ export class ChatAssistant {
     localStorage.setItem('gymai_theme', next);
 
     document.documentElement.setAttribute('data-theme', next);
+    this.updateMetaThemeColor(next);
+  }
+
+  private updateMetaThemeColor(theme: 'light' | 'dark') {
+    const color = theme === 'dark' ? '#282a36' : '#ffffff';
+    // Actualizamos o añadimos el meta tag de theme-color
+    this.meta.updateTag({ name: 'theme-color', content: color });
   }
 
   // ===== Swipe down para ocultar teclado (como ChatGPT) =====
