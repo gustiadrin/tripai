@@ -94,8 +94,14 @@ export class HomeComponent {
 
   private updateMetaThemeColor(theme: 'light' | 'dark') {
     const color = theme === 'dark' ? '#1B232B' : '#ffffff';
-    // Actualizamos o añadimos el meta tag de theme-color
-    this.meta.updateTag({ name: 'theme-color', content: color });
+
+    // Remove all existing theme-color tags (including those with media queries)
+    // to prevent conflicts and forcefully override system preference
+    const existingTags = document.querySelectorAll('meta[name="theme-color"]');
+    existingTags.forEach(tag => tag.remove());
+
+    // Add a single, definitive tag
+    this.meta.addTag({ name: 'theme-color', content: color });
   }
 
   // ===== Swipe down para ocultar teclado =====
