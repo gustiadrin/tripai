@@ -5,18 +5,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import reactor.core.publisher.Flux;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Servicio que encapsula la llamada HTTP a la API REST de Gemini.
@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  * con el texto recibido (prompt ya construido por el controlador).
  */
 @Service
+@Slf4j
 public class GeminiChatService {
 
 	@Value("${gemini.api-key}")
@@ -37,6 +38,11 @@ public class GeminiChatService {
 
 	private final WebClient webClient = WebClient.builder().build();
 	private final ObjectMapper objectMapper = new ObjectMapper();
+
+	@PostConstruct
+	public void init() {
+		log.info("🚀 Usando modelo GEMINI: {}", modelName);
+	}
 
 	/**
 	 * Envía el prompt a Gemini y devuelve el primer texto de la primera candidata.

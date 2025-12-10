@@ -29,7 +29,7 @@ export class HomeComponent {
     medicalNotes: '',
   };
 
-  saved = false;
+  isSubmitting = signal(false);
 
   // Touch handling para ocultar teclado con swipe down
   private touchStartY = 0;
@@ -56,18 +56,26 @@ export class HomeComponent {
       !!p.medicalNotes;
 
     if (hasData) {
+      this.isSubmitting.set(true);
+
+      // Simular un pequeño retardo para feedback visual si es muy rápido, 
+      // o simplemente proceder (aquí es síncrono localStorage, pero el reset es async)
       this.profileService.saveProfile(this.model);
+
+      try {
+        // Reiniciar conversación completa antes de ir al chat
+        await this.chatService.resetConversation();
+        this.router.navigate(['/chat']);
+      } catch (error) {
+        console.error('Error resetting conversation', error);
+        this.isSubmitting.set(false);
+      }
     } else {
       this.profileService.clearProfile();
+      this.isSubmitting.set(true);
+      await this.chatService.resetConversation();
+      this.router.navigate(['/chat']);
     }
-
-    this.saved = true;
-    setTimeout(() => (this.saved = false), 2000);
-
-    // Reiniciar conversación completa antes de ir al chat
-    await this.chatService.resetConversation();
-
-    this.router.navigate(['/chat']);
   }
 
   toggleTheme() {
