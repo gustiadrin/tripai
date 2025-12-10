@@ -93,7 +93,7 @@ export class HomeComponent {
   }
 
   private updateMetaThemeColor(theme: 'light' | 'dark') {
-    const color = theme === 'dark' ? '#282a36' : '#ffffff';
+    const color = theme === 'dark' ? '#1B232B' : '#ffffff';
     // Actualizamos o añadimos el meta tag de theme-color
     this.meta.updateTag({ name: 'theme-color', content: color });
   }
