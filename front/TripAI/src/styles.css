@@ -25,10 +25,8 @@ body {
 
 html {
   /* User request: Ensure html background matches body */
-  background-color: canvas;
-  /* 'canvas' is a system keyword, but with DaisyUI we rely on the @apply above. 
-     To be safe and explicit as requested: */
-  @apply bg-base-100;
+  /* DEBUG: RED BACKGROUND TO DETECT GAPS */
+  background-color: red !important;
 }
 
 /* Evitar zoom en inputs en iOS (requiere font-size >= 16px) */
