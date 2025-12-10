@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProfileService, GymProfile } from '../../services/profile-service';
 import { ChatService } from '../../services/chat-service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-home',
@@ -14,7 +15,10 @@ import { ChatService } from '../../services/chat-service';
 export class HomeComponent {
   private profileService = inject(ProfileService);
   private router = inject(Router);
+  //private router = inject(Router);
   private chatService = inject(ChatService);
+  themeService = inject(ThemeService);
+  //themeService = inject(ThemeService);
 
   theme = signal<'light' | 'dark'>(
     (localStorage.getItem('gymai_theme') as 'light' | 'dark') || 'dark'
@@ -41,8 +45,6 @@ export class HomeComponent {
     if (existing) {
       this.model = { ...existing };
     }
-
-    document.documentElement.setAttribute('data-theme', this.theme());
   }
 
   async save() {
@@ -79,10 +81,7 @@ export class HomeComponent {
   }
 
   toggleTheme() {
-    const next = this.theme() === 'dark' ? 'light' : 'dark';
-    this.theme.set(next);
-    localStorage.setItem('gymai_theme', next);
-    document.documentElement.setAttribute('data-theme', next);
+    this.themeService.toggleTheme();
   }
 
   // ===== Swipe down para ocultar teclado =====
