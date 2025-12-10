@@ -20,8 +20,7 @@ body {
   margin: 0;
   overscroll-behavior: none;
   /* Evita el bounce en iOS */
-  background-color: #1a1a2e;
-  /* Color de fondo base para cubrir áreas seguras */
+  @apply bg-base-100 text-base-content;
 }
 
 /* Evitar zoom en inputs en iOS (requiere font-size >= 16px) */
